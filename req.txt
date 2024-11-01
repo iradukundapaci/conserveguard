@@ -1,0 +1,42 @@
+req(web):
+
+auth:
+	login: email, password
+	signup: names. email,password
+
+users:
+	-lawyers: CRUD
+	-poachers: CRUD
+	- tourists: crud
+	- rangers: crud
+	- admins: crud
+
+user features:
+	-poacher: - report poaching incident crud
+		- access to messanger
+	-admin: - assign lawyers
+		- add rangers
+		- add system features
+	- dashboard: - crads: n tourists, poachers, rangers, incidents
+			- tourism tracking
+			- incident tracking
+			- poaching cases map
+			- view park boundaries map
+			- ai to detect objects in video feed and give notification
+
+system feature:
+	- animals: crud
+	- animals location: crud
+	- animal tips: crud
+
+req(mobile):
+auth: login, signup
+
+rangers:
+	-chat
+	-report paoching incident
+	-view map and boundaries
+	-view animal tips
+	-
+community:
+	-report incident
