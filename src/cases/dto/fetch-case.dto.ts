@@ -1,17 +1,19 @@
 import { IsOptional } from "class-validator";
 import { PaginationDto } from "src/__shared__/dto/pagination.dto";
-import { UserRole } from "src/__shared__/enums/user-role.enum";
+import { CasesStatus } from "../enum/case-status.enum";
 
-export namespace FetchProfileDto {
+export namespace FetchCaseDto {
   export class Input extends PaginationDto {
     @IsOptional()
     q?: string;
   }
+
   export class Output {
     id: number;
-    names: string;
-    email: string;
-    role: UserRole;
-    profileImage: string;
+    status: CasesStatus;
+    courtLocation: string;
+    courtDate: Date;
+    lawyer: string;
+    poacher: string;
   }
 }

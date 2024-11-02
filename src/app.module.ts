@@ -16,15 +16,11 @@ import {
 } from "@nestjs/common";
 import { SeedModule } from "src/__shared__/seed/seed.module";
 import { AdminSeedService } from "src/__shared__/seed/admin-seed.service";
-import { CustomerModule } from "./customer/customer.module";
-import { TasksModule } from "./tasks/tasks.module";
-import { LicenseModule } from "./license/license.module";
 import { IncidentModule } from "./incident/incident.module";
-import { RoomsModule } from "./rooms/rooms.module";
-import { BookingsModule } from "./bookings/bookings.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { ChatModule } from "./chat/chat.module";
-
+import { AnimalsModule } from "./animals/animals.module";
+import { CasesModule } from "./cases/cases.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,14 +32,11 @@ import { ChatModule } from "./chat/chat.module";
     UsersModule,
     NotificationsModule,
     SeedModule,
-    CustomerModule,
-    TasksModule,
-    LicenseModule,
     IncidentModule,
-    RoomsModule,
-    BookingsModule,
     AnalyticsModule,
     ChatModule,
+    AnimalsModule,
+    CasesModule,
   ],
   providers: [
     {

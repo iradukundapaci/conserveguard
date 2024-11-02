@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { EntityManager } from "typeorm";
 import { Booking } from "src/bookings/entities/booking.entity";
-import { Customer } from "src/customer/entities/customer.entity";
+import { Customer } from "src/animals/entities/customer.entity";
 import { Room } from "src/rooms/entities/room.entity";
-import { Task } from "src/tasks/entities/task.entity";
+import { Task } from "src/case/entities/task.entity";
 import { Incident } from "src/incident/entities/incident.entity";
 import { TaskStatus } from "src/__shared__/enums/task-status.enum";
 import { AnalyticsDto } from "./dto/analytics.dto";

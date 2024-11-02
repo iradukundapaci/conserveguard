@@ -1,16 +1,24 @@
 import { AbstractEntity } from "src/__shared__/entities/abstract.entity";
-import { IncidentStatus } from "src/__shared__/enums/incident-status.enum";
 import { Profile } from "src/users/entities/profile.entity";
 import { Column, Entity, OneToOne } from "typeorm";
+import { CasesStatus } from "../enum/case-status.enum";
 
-@Entity({ name: "incidents" })
-export class Incident extends AbstractEntity {
+@Entity({ name: "cases" })
+export class Cases extends AbstractEntity {
   @Column()
-  location: string;
+  status: CasesStatus;
+
   @Column()
-  dateCaught: Date;
+  courtLocation: string;
+
   @Column()
-  status: IncidentStatus;
+  courtDate: Date;
+
+  @OneToOne(() => Profile, (lawyer) => lawyer.id, {
+    cascade: true,
+    eager: true,
+  })
+  lawyer: Profile;
 
   @OneToOne(() => Profile, (poacher) => poacher.id, {
     cascade: true,

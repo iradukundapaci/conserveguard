@@ -9,7 +9,7 @@ export namespace CreateIncidentDto {
 
     @IsString()
     @IsNotEmpty()
-    description: string;
+    dateCaught: string;
 
     @IsEnum(IncidentStatus)
     @IsNotEmpty()
@@ -17,6 +17,6 @@ export namespace CreateIncidentDto {
 
     @IsString()
     @IsNotEmpty()
-    resolution: string;
+    poacher: string;
   }
 }

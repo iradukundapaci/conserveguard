@@ -1,12 +1,9 @@
 import { PasswordEncryption } from "src/auth/utils/password-encrytion.util";
 import { UserRole } from "src/__shared__/enums/user-role.enum";
-import { FetchProfileDto } from "./dto/fetch-profile.dto";
 import { CreateAdminDTO } from "./dto/create-admin.dto";
 import { plainToInstance } from "class-transformer";
-import { FetchUserDto } from "./dto/fetch-user.dto";
 import { paginate } from "nestjs-typeorm-paginate";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "./entities/user.entity";
 import { Repository } from "typeorm";
 import {
   ConflictException,
@@ -15,6 +12,8 @@ import {
 } from "@nestjs/common";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { User } from "./entities/user.entity";
+import { FetchProfileDto } from "./dto/fetch-profile.dto";
 
 @Injectable()
 export class UsersService {
@@ -41,9 +40,21 @@ export class UsersService {
     await this.createUser(user);
   }
 
+  async getProfile(id: number) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
+    return plainToInstance(FetchProfileDto.Output, {
+      id: user.id,
+      email: user.email,
+      names: user.profile.names,
+      role: user.profile.role,
+      profileImage: user.profile.profileImage,
+    });
+  }
+
   async createUser(user: User): Promise<User> {
     user.password = PasswordEncryption.hashPassword(user.password);
-    user.verifiedAt = new Date();
     return this.usersRepository.save(user);
   }
 
@@ -58,21 +69,14 @@ export class UsersService {
     });
   }
 
-  async findUserById(userId: number): Promise<User> {
+  async findUserById(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({
-      where: { id: userId },
+      where: { id },
     });
 
     if (!user) throw new NotFoundException("User not found");
+    delete user.password;
     return user;
-  }
-
-  async getProfile(userId: number) {
-    const userProfile = await this.findUserById(userId);
-    return plainToInstance(FetchProfileDto.OutPut, {
-      names: userProfile.names,
-      email: userProfile.email,
-    });
   }
 
   async updateProfile(
@@ -89,40 +93,11 @@ export class UsersService {
       throw new ConflictException("Email is already in use");
     }
 
-    user.names = updateProfileDto.names ?? user.names;
+    user.profile.names = updateProfileDto.names ?? user.profile.names;
     user.email = updateProfileDto.email ?? user.email;
-    user.role = updateProfileDto.role ?? user.role;
+    user.profile.role = updateProfileDto.role ?? user.profile.role;
     const updatedUser = await this.usersRepository.save(user);
     return plainToInstance(UpdateProfileDto.OutPut, updatedUser);
-  }
-
-  async updatePassword(userId: number, newPassword: string): Promise<void> {
-    const hashedPassword = PasswordEncryption.hashPassword(newPassword);
-
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException("User not found");
-    }
-
-    user.password = hashedPassword;
-
-    await this.usersRepository.save(user);
-  }
-
-  async verifyUser(userId: number): Promise<void> {
-    await this.usersRepository.update(userId, {
-      verifiedAt: new Date().toISOString(),
-    });
-  }
-
-  async updateRefreshToken(
-    userId: number,
-    refreshToken: string,
-  ): Promise<void> {
-    await this.usersRepository.update(userId, { refreshToken });
   }
 
   async deleteUser(id: number): Promise<void> {
@@ -134,25 +109,18 @@ export class UsersService {
     });
   }
 
-  async pauseUser(id: number): Promise<void> {
-    await this.findUserById(id);
-    await this.usersRepository.update(id, {
-      activated: false,
-    });
-  }
-
-  async activateUser(id: number): Promise<void> {
-    await this.findUserById(id);
-    await this.usersRepository.update(id, {
-      activated: true,
-    });
-  }
-
-  async findAllUsers(dto: FetchUserDto.Input): Promise<any> {
+  async findAllUsers(dto: FetchProfileDto.Input): Promise<any> {
     const queryBuilder = this.usersRepository
-      .createQueryBuilder("user")
+      .createQueryBuilder("users")
+      .leftJoinAndSelect("users.profile", "profile")
       .orderBy("user.id", "DESC")
-      .select(["user.id", "user.names", "user.role", "user.email"]);
+      .select([
+        "user.id",
+        "profile.names",
+        "profile.role",
+        "profile.profileImage",
+        "user.email",
+      ]);
 
     if (dto.q) {
       queryBuilder.andWhere(
@@ -163,7 +131,7 @@ export class UsersService {
       );
     }
 
-    return await paginate<FetchUserDto.Output>(queryBuilder, {
+    return await paginate(queryBuilder, {
       page: dto.page,
       limit: dto.size,
     });
