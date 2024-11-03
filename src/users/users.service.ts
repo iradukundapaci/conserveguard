@@ -14,12 +14,15 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { User } from "./entities/user.entity";
 import { FetchProfileDto } from "./dto/fetch-profile.dto";
+import { Profile } from "./entities/profile.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Profile)
+    private readonly profileRepository: Repository<Profile>,
   ) {}
 
   async createAdmin(createAdminDTO: CreateAdminDTO.Input) {
@@ -79,6 +82,15 @@ export class UsersService {
     return user;
   }
 
+  async findProfileById(id: number): Promise<Profile> {
+    const profile = await this.profileRepository.findOne({
+      where: { id },
+    });
+
+    if (!profile) throw new NotFoundException("User not found");
+    return profile;
+  }
+
   async updateProfile(
     userId: number,
     updateProfileDto: UpdateProfileDto.Input,
@@ -113,13 +125,13 @@ export class UsersService {
     const queryBuilder = this.usersRepository
       .createQueryBuilder("users")
       .leftJoinAndSelect("users.profile", "profile")
-      .orderBy("user.id", "DESC")
+      .orderBy("users.id", "DESC")
       .select([
-        "user.id",
+        "users.id",
         "profile.names",
         "profile.role",
         "profile.profileImage",
-        "user.email",
+        "users.email",
       ]);
 
     if (dto.q) {

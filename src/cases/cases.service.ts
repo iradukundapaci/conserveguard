@@ -7,34 +7,42 @@ import { CreateCaseDto } from "./dto/create-case.dto";
 import { FetchCaseDto } from "./dto/fetch-case.dto";
 import { UpdateCaseDto } from "./dto/update-case.dto";
 import { Cases } from "./entities/cases.entity";
+import { UsersService } from "src/users/users.service";
 
 @Injectable()
 export class CasesService {
   constructor(
     @InjectRepository(Cases)
     private readonly casesRepository: Repository<Cases>,
+    private readonly userService: UsersService,
   ) {}
   async createCase(createCaseDto: CreateCaseDto.Input): Promise<void> {
     const result = plainToInstance(Cases, createCaseDto);
+    const lawyer = await this.userService.findProfileById(
+      +createCaseDto.lawyer,
+    );
+    const poacher = await this.userService.findProfileById(
+      +createCaseDto.poacher,
+    );
+
+    if (!lawyer || !poacher) {
+      throw new NotFoundException("Lawyer or poacher not found");
+    }
+    result.lawyer = lawyer;
+    result.poacher = poacher;
     await this.casesRepository.save(result);
   }
 
   async findAllCases(dto: FetchCaseDto.Input): Promise<any> {
     const queryBuilder = this.casesRepository
       .createQueryBuilder("cases")
-      .orderBy("case.id", "DESC")
-      .select([
-        "case.id",
-        "case.description",
-        "case.status",
-        "case.role",
-        "case.caseStartDate",
-        "case.caseEndDate",
-      ]);
+      .leftJoinAndSelect("cases.lawyer", "lawyer")
+      .leftJoinAndSelect("cases.poacher", "poacher")
+      .orderBy("cases.id", "DESC");
 
     if (dto.q) {
       queryBuilder.andWhere(
-        "case.description ilike :searchKey OR case.status ilike :searchKey",
+        "cases.description ilike :searchKey OR cases.status ilike :searchKey",
         {
           searchKey: `%${dto.q}%`,
         },
@@ -78,6 +86,6 @@ export class CasesService {
       throw new NotFoundException("Case not found");
     }
 
-    await this.casesRepository.remove(result);
+    await this.casesRepository.softRemove(result);
   }
 }

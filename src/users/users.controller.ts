@@ -5,7 +5,6 @@ import { Authorize } from "src/auth/decorators/authorize.decorator";
 import { GetUser } from "src/auth/decorators/get-user.decorator";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { UpdateProfileDto } from "./dto/update-profile.dto";
-import { UserRole } from "src/__shared__/enums/user-role.enum";
 import { FetchProfileDto } from "./dto/fetch-profile.dto";
 import { ApiTags } from "@nestjs/swagger";
 import {
@@ -44,6 +43,7 @@ export class UsersController {
   @PostOperation("", "create a new user")
   @OkResponse()
   @ApiRequestBody(CreateUserDto.Input)
+  @Authorize(JwtGuard)
   @ErrorResponses(ConflictResponse, BadRequestResponse)
   async signUp(
     @Body() createUserDto: CreateUserDto.Input,
@@ -53,7 +53,7 @@ export class UsersController {
   }
 
   @OkResponse(FetchProfileDto.Output)
-  @Authorize(JwtGuard, UserRole.ADMIN)
+  @Authorize(JwtGuard)
   @GetOperation(":id", "get a user")
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse, NotFoundResponse)
   async getUser(@Param("id") id: number) {
@@ -86,7 +86,7 @@ export class UsersController {
 
   @DeleteOperation(":id", "delete a user")
   @OkResponse()
-  @Authorize(JwtGuard, UserRole.ADMIN)
+  @Authorize(JwtGuard)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse, NotFoundResponse)
   async deleteUser(@Param("id") id: number): Promise<GenericResponse> {
     await this.usersService.deleteUser(id);

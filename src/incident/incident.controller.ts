@@ -55,7 +55,6 @@ export class IncidentController {
   @GetOperation(":id", "Get Incident")
   @OkResponse(FetchIncidentDto.OutPut)
   @Authorize(JwtGuard, UserRole.ADMIN)
-  @ApiRequestBody(FetchIncidentDto.Input)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async findIncident(
     @Param("id") id: number,

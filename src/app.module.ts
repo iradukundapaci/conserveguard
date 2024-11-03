@@ -17,7 +17,6 @@ import {
 import { SeedModule } from "src/__shared__/seed/seed.module";
 import { AdminSeedService } from "src/__shared__/seed/admin-seed.service";
 import { IncidentModule } from "./incident/incident.module";
-import { AnalyticsModule } from "./analytics/analytics.module";
 import { ChatModule } from "./chat/chat.module";
 import { AnimalsModule } from "./animals/animals.module";
 import { CasesModule } from "./cases/cases.module";
@@ -33,7 +32,6 @@ import { CasesModule } from "./cases/cases.module";
     NotificationsModule,
     SeedModule,
     IncidentModule,
-    AnalyticsModule,
     ChatModule,
     AnimalsModule,
     CasesModule,

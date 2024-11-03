@@ -6,7 +6,7 @@ export namespace FetchIncidentDto {
 
   export class OutPut {
     id: number;
-    title: string;
+    location: string;
     dateCaught: string;
     status: IncidentStatus;
     poacher: string;

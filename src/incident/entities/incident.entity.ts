@@ -1,7 +1,7 @@
 import { AbstractEntity } from "src/__shared__/entities/abstract.entity";
 import { IncidentStatus } from "src/__shared__/enums/incident-status.enum";
 import { Profile } from "src/users/entities/profile.entity";
-import { Column, Entity, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 
 @Entity({ name: "incidents" })
 export class Incident extends AbstractEntity {
@@ -16,5 +16,6 @@ export class Incident extends AbstractEntity {
     cascade: true,
     eager: true,
   })
+  @JoinColumn()
   poacher: Profile;
 }

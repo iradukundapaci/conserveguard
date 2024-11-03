@@ -1,6 +1,6 @@
 import { AbstractEntity } from "src/__shared__/entities/abstract.entity";
 import { Profile } from "src/users/entities/profile.entity";
-import { Column, Entity, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
 import { CasesStatus } from "../enum/case-status.enum";
 
 @Entity({ name: "cases" })
@@ -14,7 +14,7 @@ export class Cases extends AbstractEntity {
   @Column()
   courtDate: Date;
 
-  @OneToOne(() => Profile, (lawyer) => lawyer.id, {
+  @ManyToOne(() => Profile, (lawyer) => lawyer.id, {
     cascade: true,
     eager: true,
   })
@@ -24,5 +24,6 @@ export class Cases extends AbstractEntity {
     cascade: true,
     eager: true,
   })
+  @JoinColumn()
   poacher: Profile;
 }

@@ -38,7 +38,7 @@ export class AnimalsService {
   async findAllAnimal(dto: FetchAnimalDto.Input): Promise<any> {
     const queryBuilder = this.animalsRepository
       .createQueryBuilder("animals")
-      .orderBy("animal.id", "DESC");
+      .orderBy("animals.id", "DESC");
 
     if (dto.q) {
       queryBuilder.andWhere(
@@ -92,7 +92,7 @@ export class AnimalsService {
       throw new NotFoundException("Animal not found");
     }
 
-    await this.animalsRepository.remove(animal);
+    await this.animalsRepository.softRemove(animal);
   }
 
   async findAnimalByName(names: string): Promise<Animals | undefined> {

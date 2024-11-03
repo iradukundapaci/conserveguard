@@ -5,11 +5,11 @@ export namespace CreateIncidentDto {
   export class Input {
     @IsString()
     @IsNotEmpty()
-    title: string;
+    location: string;
 
     @IsString()
     @IsNotEmpty()
-    dateCaught: string;
+    dateCaught: Date;
 
     @IsEnum(IncidentStatus)
     @IsNotEmpty()

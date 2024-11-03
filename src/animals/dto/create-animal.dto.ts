@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString } from "class-validator";
 
 export namespace CreateAnimalDto {
   export class Input {
@@ -6,7 +6,7 @@ export namespace CreateAnimalDto {
     @IsNotEmpty()
     names: string;
 
-    @IsEmail()
+    @IsString()
     @IsNotEmpty()
     location: string;
 

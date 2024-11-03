@@ -32,14 +32,16 @@ export class CasesController {
   @Authorize(JwtGuard)
   @ApiRequestBody(CreateCaseDto.Input)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
-  async createCase(@Body() createCaseDto: CreateCaseDto.Input): Promise<void> {
-    return await this.casesService.createCase(createCaseDto);
+  async createCase(
+    @Body() createCaseDto: CreateCaseDto.Input,
+  ): Promise<GenericResponse> {
+    await this.casesService.createCase(createCaseDto);
+    return new GenericResponse("Case created successfully");
   }
 
   @GetOperation("", "Get all cases")
   @PaginatedOkResponse(FetchCaseDto.Output)
   @Authorize(JwtGuard)
-  @ApiRequestBody(FetchCaseDto.Input)
   @ErrorResponses(UnauthorizedResponse)
   async getAllCases(
     @Query() fetchCaseDto: FetchCaseDto.Input,
@@ -74,7 +76,8 @@ export class CasesController {
   @OkResponse()
   @Authorize(JwtGuard, UserRole.ADMIN)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
-  async removeCustomer(@Param("id") id: number): Promise<void> {
-    return await this.casesService.removeCaseById(id);
+  async removeCustomer(@Param("id") id: number): Promise<GenericResponse> {
+    await this.casesService.removeCaseById(id);
+    return new GenericResponse("Case deleted successfully");
   }
 }

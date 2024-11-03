@@ -3,7 +3,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsString,
-  IsStrongPassword,
+  MinLength,
 } from "class-validator";
 import { UserRole } from "src/__shared__/enums/user-role.enum";
 
@@ -22,9 +22,9 @@ export namespace SignupDto {
     @IsNotEmpty()
     email: string;
 
-    @IsStrongPassword({
-      minLength: 8,
-    })
+    @IsString()
+    @MinLength(8)
+    @IsNotEmpty()
     password: string;
   }
 }

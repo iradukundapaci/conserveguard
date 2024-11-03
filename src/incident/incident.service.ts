@@ -20,31 +20,25 @@ export class IncidentService {
     userId: number,
     createIncidentDto: CreateIncidentDto.Input,
   ): Promise<void> {
-    const user = await this.userService.findUserById(userId);
+    const user = await this.userService.findProfileById(userId);
 
     if (!user) {
       throw new NotFoundException("User not found");
     }
 
     const incident = plainToInstance(Incident, createIncidentDto);
-    incident.user = user;
+    incident.poacher = user;
 
     await this.incidentRepository.save(incident);
   }
 
   async findAllIncident(dto: FetchIncidentDto.Input): Promise<any> {
     const queryBuilder = this.incidentRepository
-      .createQueryBuilder("incident")
-      .orderBy("incident.id", "DESC")
-      .select([
-        "incident.id",
-        "incident.title",
-        "incident.description",
-        "incident.status",
-        "incident.resolution",
-      ]);
+      .createQueryBuilder("incidents")
+      .leftJoinAndSelect("incidents.poacher", "poacher")
+      .orderBy("incidents.id", "DESC");
 
-    return await paginate<FetchIncidentDto.OutPut>(queryBuilder, {
+    return await paginate(queryBuilder, {
       page: dto.page,
       limit: dto.size,
     });
