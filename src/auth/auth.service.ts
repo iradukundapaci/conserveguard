@@ -12,6 +12,7 @@ import {
 import { plainToInstance } from "class-transformer";
 import { Profile } from "src/users/entities/profile.entity";
 import { User } from "src/users/entities/user.entity";
+import { UserRole } from "src/__shared__/enums/user-role.enum";
 
 @Injectable()
 export class AuthService {

@@ -134,6 +134,12 @@ export class UsersService {
         "users.email",
       ]);
 
+    if (dto.role) {
+      queryBuilder.andWhere("profile.role = :role", {
+        role: dto.role,
+      });
+    }
+
     if (dto.q) {
       queryBuilder.andWhere(
         "user.names ilike :searchKey OR user.email ilike :searchKey",
