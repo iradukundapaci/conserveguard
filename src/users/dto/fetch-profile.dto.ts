@@ -5,7 +5,10 @@ import { UserRole } from "src/__shared__/enums/user-role.enum";
 export namespace FetchProfileDto {
   export class Input extends PaginationDto {
     @IsOptional()
-    role: UserRole;
+    role?: UserRole;
+
+    @IsOptional()
+    hasNoGroup?: string;
 
     @IsOptional()
     q?: string;

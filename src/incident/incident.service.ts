@@ -16,18 +16,30 @@ export class IncidentService {
     private readonly incidentRepository: Repository<Incident>,
     private readonly userService: UsersService,
   ) {}
+
   async createIncident(
     userId: number,
     createIncidentDto: CreateIncidentDto.Input,
   ): Promise<void> {
-    const user = await this.userService.findProfileById(userId);
+    const reportingUser = await this.userService.findUserById(userId);
 
-    if (!user) {
-      throw new NotFoundException("User not found");
+    if (!reportingUser) {
+      throw new NotFoundException("Reporting user not found");
     }
 
-    const incident = plainToInstance(Incident, createIncidentDto);
-    incident.poacher = user;
+    const { evidence, ...incidentData } = createIncidentDto;
+
+    const incident = plainToInstance(Incident, {
+      ...incidentData,
+      reportingUser,
+    });
+
+    if (evidence?.length) {
+      incident.evidence = evidence.map((item) => ({
+        type: item.type,
+        url: item.url,
+      }));
+    }
 
     await this.incidentRepository.save(incident);
   }
@@ -35,7 +47,7 @@ export class IncidentService {
   async findAllIncident(dto: FetchIncidentDto.Input): Promise<any> {
     const queryBuilder = this.incidentRepository
       .createQueryBuilder("incidents")
-      .leftJoinAndSelect("incidents.poacher", "poacher")
+      .leftJoinAndSelect("incidents.reportingUser", "reportingUser")
       .orderBy("incidents.id", "DESC");
 
     return await paginate(queryBuilder, {
@@ -47,6 +59,7 @@ export class IncidentService {
   async findIncidentById(id: number): Promise<Incident> {
     const incident = await this.incidentRepository.findOne({
       where: { id },
+      relations: ["reportingUser"],
     });
     if (!incident) {
       throw new NotFoundException("Incident not found");
@@ -59,10 +72,21 @@ export class IncidentService {
     updateIncidentDto: UpdateIncidentDto.Input,
   ): Promise<Incident> {
     const incident = await this.findIncidentById(id);
+
+    const { evidence, ...updateData } = updateIncidentDto;
+
     const updatedIncident = plainToInstance(Incident, {
       ...incident,
-      ...updateIncidentDto,
+      ...updateData,
     });
+
+    if (evidence?.length) {
+      updatedIncident.evidence = evidence.map((item) => ({
+        type: item.type,
+        url: item.url,
+      }));
+    }
+
     await this.incidentRepository.save(updatedIncident);
     return updatedIncident;
   }

@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsString,
-  MinLength,
-} from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { UserRole } from "src/__shared__/enums/user-role.enum";
 
 /** Sign up DTO */
@@ -23,7 +17,6 @@ export namespace SignupDto {
     email: string;
 
     @IsString()
-    @MinLength(8)
     @IsNotEmpty()
     password: string;
   }

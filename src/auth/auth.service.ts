@@ -10,9 +10,7 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
-import { Profile } from "src/users/entities/profile.entity";
 import { User } from "src/users/entities/user.entity";
-import { UserRole } from "src/__shared__/enums/user-role.enum";
 
 @Injectable()
 export class AuthService {
@@ -33,14 +31,9 @@ export class AuthService {
     const user = plainToInstance(User, {
       email,
       password,
-    });
-
-    const profile = plainToInstance(Profile, {
       names,
       role,
     });
-
-    user.profile = profile;
 
     await this.usersService.createUser(user);
   }
@@ -55,7 +48,7 @@ export class AuthService {
     const payload: IJwtPayload = {
       sub: user.email,
       id: user.id,
-      role: user.profile.role,
+      role: user.role,
     };
     const accessToken = this.tokenService.generateJwtToken(payload);
 

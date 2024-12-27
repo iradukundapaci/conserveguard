@@ -19,7 +19,9 @@ import { AdminSeedService } from "src/__shared__/seed/admin-seed.service";
 import { IncidentModule } from "./incident/incident.module";
 import { ChatModule } from "./chat/chat.module";
 import { AnimalsModule } from "./animals/animals.module";
-import { CasesModule } from "./cases/cases.module";
+import { GroupModule } from "./group/group.module";
+import { ScheduleModule } from "./schedule/schedule.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -34,7 +36,9 @@ import { CasesModule } from "./cases/cases.module";
     IncidentModule,
     ChatModule,
     AnimalsModule,
-    CasesModule,
+    GroupModule,
+    ScheduleModule,
+    AnalyticsModule,
   ],
   providers: [
     {

@@ -1,6 +1,7 @@
 import { AbstractEntity } from "src/__shared__/entities/abstract.entity";
-import { Entity, Column, OneToOne, JoinColumn } from "typeorm";
-import { Profile } from "./profile.entity";
+import { Entity, Column, ManyToOne } from "typeorm";
+import { UserRole } from "src/__shared__/enums/user-role.enum";
+import { Group } from "src/group/entities/group.entity";
 
 @Entity("users")
 export class User extends AbstractEntity {
@@ -10,11 +11,17 @@ export class User extends AbstractEntity {
   @Column()
   password: string;
 
-  @OneToOne(() => Profile, (profile) => profile.id, {
-    cascade: true,
-    eager: true,
+  @Column()
+  names: string;
+
+  @Column()
+  role: UserRole;
+
+  @Column({ nullable: true })
+  profileImage: string;
+
+  @ManyToOne(() => Group, (group) => group.rangers, {
     nullable: true,
   })
-  @JoinColumn()
-  profile: Profile;
+  group: Group;
 }

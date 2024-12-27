@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsString,
-  IsStrongPassword,
-} from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { UserRole } from "src/__shared__/enums/user-role.enum";
 
 export namespace CreateUserDto {
@@ -21,12 +15,8 @@ export namespace CreateUserDto {
     @IsEnum(UserRole)
     role: UserRole;
 
-    @IsStrongPassword({
-      minLength: 8,
-      minLowercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    })
+    @IsString()
+    @IsNotEmpty()
     password: string;
   }
 }

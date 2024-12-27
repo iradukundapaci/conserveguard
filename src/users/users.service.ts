@@ -14,15 +14,12 @@ import { UpdateProfileDto } from "./dto/update-profile.dto";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { User } from "./entities/user.entity";
 import { FetchProfileDto } from "./dto/fetch-profile.dto";
-import { Profile } from "./entities/profile.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @InjectRepository(Profile)
-    private readonly profileRepository: Repository<Profile>,
   ) {}
 
   async createAdmin(createAdminDTO: CreateAdminDTO.Input) {
@@ -50,9 +47,9 @@ export class UsersService {
     return plainToInstance(FetchProfileDto.Output, {
       id: user.id,
       email: user.email,
-      names: user.profile.names,
-      role: user.profile.role,
-      profileImage: user.profile.profileImage,
+      names: user.names,
+      role: user.role,
+      profileImage: user.profileImage,
     });
   }
 
@@ -82,15 +79,6 @@ export class UsersService {
     return user;
   }
 
-  async findProfileById(id: number): Promise<Profile> {
-    const profile = await this.profileRepository.findOne({
-      where: { id },
-    });
-
-    if (!profile) throw new NotFoundException("User not found");
-    return profile;
-  }
-
   async updateProfile(
     userId: number,
     updateProfileDto: UpdateProfileDto.Input,
@@ -105,9 +93,9 @@ export class UsersService {
       throw new ConflictException("Email is already in use");
     }
 
-    user.profile.names = updateProfileDto.names ?? user.profile.names;
+    user.names = updateProfileDto.names ?? user.names;
     user.email = updateProfileDto.email ?? user.email;
-    user.profile.role = updateProfileDto.role ?? user.profile.role;
+    user.role = updateProfileDto.role ?? user.role;
     const updatedUser = await this.usersRepository.save(user);
     return plainToInstance(UpdateProfileDto.OutPut, updatedUser);
   }
@@ -124,25 +112,29 @@ export class UsersService {
   async findAllUsers(dto: FetchProfileDto.Input): Promise<any> {
     const queryBuilder = this.usersRepository
       .createQueryBuilder("users")
-      .leftJoinAndSelect("users.profile", "profile")
+      .leftJoinAndSelect("users.group", "group")
       .orderBy("users.id", "DESC")
       .select([
         "users.id",
-        "profile.names",
-        "profile.role",
-        "profile.profileImage",
+        "users.names",
+        "users.role",
+        "users.profileImage",
         "users.email",
       ]);
 
     if (dto.role) {
-      queryBuilder.andWhere("profile.role = :role", {
+      queryBuilder.andWhere("users.role = :role", {
         role: dto.role,
       });
     }
 
+    if (dto.hasNoGroup === "true") {
+      queryBuilder.andWhere("users.groupId IS NULL");
+    }
+
     if (dto.q) {
       queryBuilder.andWhere(
-        "user.names ilike :searchKey OR user.email ilike :searchKey",
+        "(users.names ilike :searchKey OR users.email ilike :searchKey)",
         {
           searchKey: `%${dto.q}%`,
         },
