@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { plainToInstance } from "class-transformer";
 import { paginate } from "nestjs-typeorm-paginate";
@@ -20,14 +16,6 @@ export class AnimalsService {
     private readonly animalsRepository: Repository<Animals>,
   ) {}
   async createAnimal(createAnimalDto: CreateAnimalDto.Input): Promise<void> {
-    const animal = await this.animalsRepository.findOne({
-      where: { names: createAnimalDto.names },
-    });
-
-    if (animal) {
-      throw new ConflictException("Animal already exists");
-    }
-
     const newAnimal = plainToInstance(Animals, {
       ...createAnimalDto,
     });
@@ -38,6 +26,13 @@ export class AnimalsService {
   async findAllAnimal(dto: FetchAnimalDto.Input): Promise<any> {
     const queryBuilder = this.animalsRepository
       .createQueryBuilder("animals")
+      .select([
+        "animals.id",
+        "animals.names",
+        "animals.species",
+        "animals.latitude",
+        "animals.longitude",
+      ])
       .orderBy("animals.id", "DESC");
 
     if (dto.q) {

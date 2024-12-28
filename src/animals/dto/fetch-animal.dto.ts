@@ -9,7 +9,8 @@ export namespace FetchAnimalDto {
 
   export class Output {
     names: string;
-    location: string;
-    tips: string;
+    species: string;
+    latitude: number;
+    longitude: number;
   }
 }

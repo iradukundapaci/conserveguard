@@ -7,8 +7,11 @@ export class Animals extends AbstractEntity {
   names: string;
 
   @Column()
-  location: string;
+  species: string;
 
-  @Column()
-  tips: string;
+  @Column("double precision")
+  latitude: number;
+
+  @Column("double precision")
+  longitude: number;
 }

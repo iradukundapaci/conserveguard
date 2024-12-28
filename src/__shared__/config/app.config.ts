@@ -23,7 +23,6 @@ export function appConfig(): IAppConfig {
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT,
     },
-    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(","),
     swaggerEnabled: process.env.SWAGGER_ENABLED === "true",
     env: process.env.NODE_ENV,
     jwt: {

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export namespace CreateAnimalDto {
   export class Input {
@@ -8,10 +8,14 @@ export namespace CreateAnimalDto {
 
     @IsString()
     @IsNotEmpty()
-    location: string;
+    species: string;
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    tips: string;
+    latitude: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    longitude: number;
   }
 }

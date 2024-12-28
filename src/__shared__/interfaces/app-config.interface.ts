@@ -3,7 +3,6 @@ export interface IAppConfig {
   database: IDatabaseConfig;
   env?: string;
   jwt?: JwtConfig;
-  allowedOrigins?: string[];
   swaggerEnabled?: boolean;
   backdoor?: IBackdoorConfig;
 }
