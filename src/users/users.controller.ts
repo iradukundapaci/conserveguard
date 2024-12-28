@@ -71,14 +71,14 @@ export class UsersController {
     NotFoundResponse,
     BadRequestResponse,
   )
-  @PatchOperation("profile", "update user profile")
+  @PatchOperation(":id", "update user profile")
   @Authorize(JwtGuard)
   async updateProfile(
-    @GetUser() user: User,
+    @Param("id") userId: number,
     @Body() updateProfileDto: UpdateProfileDto.Input,
   ): Promise<GenericResponse<UpdateProfileDto.OutPut>> {
     const updatedUser = await this.usersService.updateProfile(
-      +user.id,
+      userId,
       updateProfileDto,
     );
     return new GenericResponse("Profile updated successfully", updatedUser);

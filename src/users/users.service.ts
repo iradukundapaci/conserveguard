@@ -85,14 +85,6 @@ export class UsersService {
   ) {
     const user = await this.findUserById(userId);
 
-    const exist = await this.usersRepository.findOne({
-      where: { email: updateProfileDto.email },
-    });
-
-    if (exist && exist.id !== userId) {
-      throw new ConflictException("Email is already in use");
-    }
-
     user.names = updateProfileDto.names ?? user.names;
     user.email = updateProfileDto.email ?? user.email;
     user.role = updateProfileDto.role ?? user.role;
