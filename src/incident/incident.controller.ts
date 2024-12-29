@@ -5,6 +5,8 @@ import {
   Query,
   UploadedFiles,
   UseInterceptors,
+  NotFoundException,
+  Res,
 } from "@nestjs/common";
 import { IncidentService } from "./incident.service";
 import { ApiTags } from "@nestjs/swagger";
@@ -27,8 +29,12 @@ import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
 import { FetchIncidentDto } from "./dto/fetch-incident.dto";
 import { UpdateIncidentDto } from "./dto/update-incident.dto";
-import { GetUser } from "src/auth/decorators/get-user.decorator";
 import { FilesInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { v4 as uuidv4 } from "uuid";
+import { Response } from "express";
+import { resolve } from "path";
+import { existsSync } from "fs";
 
 @ApiTags("Incidents")
 @Controller("incidents")
@@ -38,21 +44,45 @@ export class IncidentController {
   @PostOperation("", "Create Incident")
   @CreatedResponse()
   @ApiRequestBody(CreateIncidentDto.Input)
-  @UseInterceptors(FilesInterceptor("evidence", 10))
+  @UseInterceptors(
+    FilesInterceptor("files", 10, {
+      storage: diskStorage({
+        destination: "./uploads",
+        filename: (req, file, callback) => {
+          const fileExtension = file.originalname.split(".").pop();
+          const uniqueName = `${uuidv4()}.${fileExtension}`;
+          callback(null, uniqueName);
+        },
+      }),
+    }),
+  )
   async createIncident(
-    @GetUser("id") id: number,
     @Body() createIncidentDto: CreateIncidentDto.Input,
     @UploadedFiles() evidence: Express.Multer.File[],
   ): Promise<GenericResponse> {
-    const files = evidence?.map((file) => ({
-      url: file.path,
-      type: file.mimetype,
-    }));
+    const files = evidence?.map((file) => file.filename);
 
-    createIncidentDto.evidence = files || [];
-
-    await this.incidentService.createIncident(id, createIncidentDto);
+    await this.incidentService.createIncident(createIncidentDto, files);
     return new GenericResponse("Incident created successfully");
+  }
+
+  @GetOperation("download/:filename", "Download File")
+  async downloadFile(
+    @Param("filename") filename: string,
+    @Res() res: Response,
+  ) {
+    const filePath = resolve(__dirname, "../../uploads", filename);
+    const exists = existsSync(filePath);
+
+    if (!exists) {
+      throw new NotFoundException("File not found");
+    }
+
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        throw new Error("Error sending file");
+      }
+    });
   }
 
   @GetOperation("", "Get All Incident")
@@ -76,20 +106,11 @@ export class IncidentController {
   @OkResponse()
   @Authorize(JwtGuard, UserRole.ADMIN)
   @ApiRequestBody(UpdateIncidentDto.Input)
-  @UseInterceptors(FilesInterceptor("evidence", 10))
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async updateIncident(
     @Param("id") id: number,
     @Body() updateIncidentDto: UpdateIncidentDto.Input,
-    @UploadedFiles() evidence: Express.Multer.File[],
   ) {
-    const files = evidence?.map((file) => ({
-      url: file.path,
-      type: file.mimetype,
-    }));
-
-    updateIncidentDto.evidence = files || [];
-
     await this.incidentService.updateIncidentById(id, updateIncidentDto);
     return new GenericResponse("Incident updated successfully");
   }

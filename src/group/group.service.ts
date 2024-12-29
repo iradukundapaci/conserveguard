@@ -62,9 +62,26 @@ export class GroupService {
     }
 
     const rangers = await Promise.all(
-      rangerIds.map((id) => this.userService.findUserById(id)),
+      rangerIds.map(async (id) => {
+        const user = await this.userService.findUserById(id);
+        if (!user) {
+          throw new Error(`User with id ${id} not found.`);
+        }
+        return user;
+      }),
     );
-    group.rangers = [...group.rangers, ...rangers];
-    await this.groupRepository.save(group);
+
+    try {
+      group.rangers = [...group.rangers, ...rangers];
+      await this.groupRepository.save(group);
+    } catch (e) {
+      await this.groupRepository.save({
+        ...group,
+        rangers: group.rangers.filter(
+          (ranger) => !rangerIds.includes(ranger.id),
+        ),
+      });
+      throw e;
+    }
   }
 }

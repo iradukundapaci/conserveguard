@@ -8,12 +8,6 @@ export class Incident extends AbstractEntity {
   @Column({ nullable: false })
   poacherName: string;
 
-  @Column({ nullable: false })
-  poacherPhone: string;
-
-  @Column({ nullable: false })
-  location: string;
-
   @Column({ type: "timestamp", nullable: false })
   dateCaught: Date;
 
@@ -25,8 +19,8 @@ export class Incident extends AbstractEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ type: "jsonb", nullable: true })
-  evidence: { type: string; url: string }[];
+  @Column("text", { array: true, nullable: true })
+  evidence: string[];
 
   @ManyToOne(() => User, (user) => user.id)
   reportingUserId: string;

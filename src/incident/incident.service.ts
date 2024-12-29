@@ -18,28 +18,22 @@ export class IncidentService {
   ) {}
 
   async createIncident(
-    userId: number,
     createIncidentDto: CreateIncidentDto.Input,
+    files: string[],
   ): Promise<void> {
-    const reportingUser = await this.userService.findUserById(userId);
+    const reportingUser = await this.userService.findUserById(
+      +createIncidentDto.reportingUserId,
+    );
 
     if (!reportingUser) {
       throw new NotFoundException("Reporting user not found");
     }
 
-    const { evidence, ...incidentData } = createIncidentDto;
-
     const incident = plainToInstance(Incident, {
-      ...incidentData,
+      ...createIncidentDto,
       reportingUser,
     });
-
-    if (evidence?.length) {
-      incident.evidence = evidence.map((item) => ({
-        type: item.type,
-        url: item.url,
-      }));
-    }
+    incident.evidence = files;
 
     await this.incidentRepository.save(incident);
   }
@@ -73,19 +67,10 @@ export class IncidentService {
   ): Promise<Incident> {
     const incident = await this.findIncidentById(id);
 
-    const { evidence, ...updateData } = updateIncidentDto;
-
     const updatedIncident = plainToInstance(Incident, {
       ...incident,
-      ...updateData,
+      ...updateIncidentDto,
     });
-
-    if (evidence?.length) {
-      updatedIncident.evidence = evidence.map((item) => ({
-        type: item.type,
-        url: item.url,
-      }));
-    }
 
     await this.incidentRepository.save(updatedIncident);
     return updatedIncident;
