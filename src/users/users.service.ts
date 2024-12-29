@@ -112,6 +112,8 @@ export class UsersService {
         "users.role",
         "users.profileImage",
         "users.email",
+        "group.id",
+        "group.name",
       ]);
 
     if (dto.role) {

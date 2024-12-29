@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   NotFoundException,
   Res,
+  StreamableFile,
 } from "@nestjs/common";
 import { IncidentService } from "./incident.service";
 import { ApiTags } from "@nestjs/swagger";
@@ -35,6 +36,7 @@ import { Response } from "express";
 import { resolve } from "path";
 import { existsSync } from "fs";
 import { GetUser } from "src/auth/decorators/get-user.decorator";
+import { GenerateReportDto } from "./dto/generate-report.dto";
 
 @ApiTags("Incidents")
 @Controller("incidents")
@@ -73,18 +75,34 @@ export class IncidentController {
     @Param("filename") filename: string,
     @Res() res: Response,
   ) {
-    const filePath = resolve(__dirname, "../../uploads", filename);
-    const exists = existsSync(filePath);
+    try {
+      const filePath = resolve(__dirname, "../../uploads", filename);
+      const exists = existsSync(filePath);
 
-    if (!exists) {
-      throw new NotFoundException("File not found");
-    }
-
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        throw new Error("Error sending file");
+      if (!exists) {
+        throw new NotFoundException("File not found");
       }
-    });
+
+      res.sendFile(filePath, (err) => {
+        if (err) {
+          console.error("Error sending file:", err); // Log the error for debugging
+          res.status(500).send("Error sending file"); // Send a user-friendly error response
+        }
+      });
+    } catch (error) {
+      console.error("Error in downloadFile method:", error);
+      res.status(500).send("An error occurred while processing your request");
+    }
+  }
+
+  @GetOperation("report", "Generate and Download Report")
+  @OkResponse()
+  async generateAndDownloadReport(
+    @Query() dto: GenerateReportDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const fileName = await this.incidentService.generateReport(dto);
+    return this.incidentService.downloadReport(fileName, res);
   }
 
   @GetOperation("", "Get All Incident")
