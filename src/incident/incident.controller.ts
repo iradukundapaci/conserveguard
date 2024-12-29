@@ -23,7 +23,6 @@ import {
   PatchOperation,
 } from "src/__shared__/decorators";
 import { GenericResponse } from "src/__shared__/dto/generic-response.dto";
-import { UserRole } from "src/__shared__/enums/user-role.enum";
 import { Authorize } from "src/auth/decorators/authorize.decorator";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
 import { CreateIncidentDto } from "./dto/create-incident.dto";
@@ -89,7 +88,6 @@ export class IncidentController {
   }
 
   @GetOperation("", "Get All Incident")
-  @Authorize(JwtGuard)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async getAllIncident(@Query() fetchIncidentDto: FetchIncidentDto.Input) {
     const incidents =
@@ -98,7 +96,6 @@ export class IncidentController {
   }
 
   @GetOperation(":id", "Get Incident")
-  @Authorize(JwtGuard, UserRole.ADMIN)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async findIncident(@Param("id") id: number) {
     const incident = await this.incidentService.findIncidentById(id);
@@ -107,7 +104,6 @@ export class IncidentController {
 
   @PatchOperation(":id", "Update Incident")
   @OkResponse()
-  @Authorize(JwtGuard, UserRole.ADMIN)
   @ApiRequestBody(UpdateIncidentDto.Input)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async updateIncident(
@@ -120,7 +116,6 @@ export class IncidentController {
 
   @DeleteOperation(":id", "Delete Incident")
   @OkResponse()
-  @Authorize(JwtGuard, UserRole.ADMIN)
   @ErrorResponses(UnauthorizedResponse, ForbiddenResponse)
   async removeIncident(@Param("id") id: number): Promise<GenericResponse> {
     await this.incidentService.removeIncidentById(id);

@@ -23,5 +23,5 @@ export class Incident extends AbstractEntity {
   evidence: string[];
 
   @ManyToOne(() => User, (user) => user.id)
-  reportingUserId: string;
+  ranger: User;
 }

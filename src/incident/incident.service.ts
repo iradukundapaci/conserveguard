@@ -30,8 +30,8 @@ export class IncidentService {
 
     const incident = plainToInstance(Incident, {
       ...createIncidentDto,
-      reportingUser,
     });
+    incident.ranger = reportingUser;
     incident.evidence = files;
 
     await this.incidentRepository.save(incident);
@@ -40,7 +40,17 @@ export class IncidentService {
   async findAllIncident(dto: FetchIncidentDto.Input): Promise<any> {
     const queryBuilder = this.incidentRepository
       .createQueryBuilder("incidents")
-      .leftJoinAndSelect("incidents.reportingUser", "reportingUser")
+      .leftJoinAndSelect("incidents.ranger", "ranger")
+      .select([
+        "incidents.id",
+        "incidents.dateCaught",
+        "incidents.description",
+        "incidents.evidence",
+        "incidents.createdAt",
+        "incidents.updatedAt",
+        "ranger.id",
+        "ranger.names",
+      ])
       .orderBy("incidents.id", "DESC");
 
     return await paginate(queryBuilder, {
@@ -52,7 +62,7 @@ export class IncidentService {
   async findIncidentById(id: number): Promise<Incident> {
     const incident = await this.incidentRepository.findOne({
       where: { id },
-      relations: ["reportingUser"],
+      relations: ["ranger"],
     });
     if (!incident) {
       throw new NotFoundException("Incident not found");
