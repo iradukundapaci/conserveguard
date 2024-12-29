@@ -35,6 +35,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
 import { resolve } from "path";
 import { existsSync } from "fs";
+import { GetUser } from "src/auth/decorators/get-user.decorator";
 
 @ApiTags("Incidents")
 @Controller("incidents")
@@ -44,6 +45,7 @@ export class IncidentController {
   @PostOperation("", "Create Incident")
   @CreatedResponse()
   @ApiRequestBody(CreateIncidentDto.Input)
+  @Authorize(JwtGuard)
   @UseInterceptors(
     FilesInterceptor("files", 10, {
       storage: diskStorage({
@@ -57,12 +59,13 @@ export class IncidentController {
     }),
   )
   async createIncident(
+    @GetUser("id") id: number,
     @Body() createIncidentDto: CreateIncidentDto.Input,
     @UploadedFiles() evidence: Express.Multer.File[],
   ): Promise<GenericResponse> {
     const files = evidence?.map((file) => file.filename);
 
-    await this.incidentService.createIncident(createIncidentDto, files);
+    await this.incidentService.createIncident(id, createIncidentDto, files);
     return new GenericResponse("Incident created successfully");
   }
 

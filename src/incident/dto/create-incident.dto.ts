@@ -13,9 +13,5 @@ export namespace CreateIncidentDto {
     @IsString()
     @IsOptional()
     description: string;
-
-    @IsString()
-    @IsOptional()
-    reportingUserId: string;
   }
 }

@@ -18,12 +18,11 @@ export class IncidentService {
   ) {}
 
   async createIncident(
+    id: number,
     createIncidentDto: CreateIncidentDto.Input,
     files: string[],
   ): Promise<void> {
-    const reportingUser = await this.userService.findUserById(
-      +createIncidentDto.reportingUserId,
-    );
+    const reportingUser = await this.userService.findUserById(id);
 
     if (!reportingUser) {
       throw new NotFoundException("Reporting user not found");
