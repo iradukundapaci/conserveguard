@@ -43,13 +43,20 @@ export class UsersService {
   async getProfile(id: number) {
     const user = await this.usersRepository.findOne({
       where: { id },
+      relations: ["group"],
     });
+
+    const group = user.group
+      ? { id: user.group.id, name: user.group.name }
+      : null;
+
     return plainToInstance(FetchProfileDto.Output, {
       id: user.id,
       email: user.email,
       names: user.names,
       role: user.role,
       profileImage: user.profileImage,
+      group,
     });
   }
 

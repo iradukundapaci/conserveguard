@@ -19,5 +19,6 @@ export namespace FetchProfileDto {
     email: string;
     role: UserRole;
     profileImage: string;
+    group: { id: number; name: string };
   }
 }
