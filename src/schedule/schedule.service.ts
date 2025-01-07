@@ -63,6 +63,12 @@ export class ScheduleService {
       ])
       .orderBy("schedule.weekDay", "ASC");
 
+    if (input.groupId) {
+      querriBuilder.andWhere("schedule.groupId = :groupId", {
+        groupId: input.groupId,
+      });
+    }
+
     if (input.weekDay) {
       querriBuilder.andWhere("schedule.weekDay = :weekDay", {
         weekDay: input.weekDay,

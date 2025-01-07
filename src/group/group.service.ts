@@ -30,6 +30,12 @@ export class GroupService {
       )
       .orderBy("groups.name", "ASC");
 
+    if (input.userId) {
+      queryBuilder
+        .leftJoin("groups.rangers", "rangers")
+        .andWhere("rangers.id = :userId", { userId: input.userId });
+    }
+
     return await paginate<Group>(queryBuilder, {
       page: input.page,
       limit: input.size,
