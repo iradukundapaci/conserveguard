@@ -290,63 +290,109 @@ export class IncidentService {
 
   private async createPdfReport(data: any[], filePath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({
+        margin: 50,
+        size: "A4",
+      });
       const stream = fs.createWriteStream(filePath);
 
       doc.pipe(stream);
 
-      // Add title
-      doc.fontSize(20).text("Incidents Report", { align: "center" }).moveDown();
+      // Custom color palette
+      const colors = {
+        header: "#2C3E50",
+        text: "#34495E",
+        accent: "#3498DB",
+        separator: "#BDC3C7",
+      };
 
-      // Add metadata
+      // Header and Title
       doc
-        .fontSize(12)
-        .text(`Generated: ${formatDate(new Date(), "yyyy-MM-dd HH:mm")}`)
-        .text(`Total Incidents: ${data.length}`)
+        .fillColor(colors.header)
+        .fontSize(24)
+        .font("Helvetica-Bold")
+        .text("Incidents Report", { align: "center" })
         .moveDown();
 
-      // Create table header
-      const tableTop = 150;
-      const textConfig = { width: 500, align: "left" as const };
+      // Metadata with styling
+      doc
+        .fillColor(colors.accent)
+        .fontSize(12)
+        .font("Helvetica")
+        .text(`Generated: ${formatDate(new Date(), "yyyy-MM-dd HH:mm")}`, {
+          align: "right",
+        })
+        .fillColor(colors.text)
+        .text(`Total Incidents: ${data.length}`, { align: "right" })
+        .moveDown(1.5);
 
-      doc.fontSize(10);
-
-      // Add incidents
+      // Table-like formatting
+      const tableTop = 200;
       let currentY = tableTop;
-      data.forEach((incident) => {
+
+      data.forEach((incident, index) => {
+        // Add page break if needed
         if (currentY > 700) {
           doc.addPage();
           currentY = 50;
         }
 
-        doc.y = currentY;
+        // Alternate background color for better readability
         doc
-          .text(`ID: ${incident.id}`, 50, currentY, textConfig)
-          .text(
-            `Date: ${formatDate(incident.dateCaught, "yyyy-MM-dd")}`,
-            50,
-            doc.y,
-            textConfig,
-          )
-          .text(
-            `Ranger: ${incident.ranger?.names || "Unknown"}`,
-            50,
-            doc.y,
-            textConfig,
-          )
-          .text(`Description: ${incident.description}`, 50, doc.y, textConfig)
-          .text(
-            `Evidence: ${incident.evidence?.join(", ") || "None"}`,
-            50,
-            doc.y,
-            textConfig,
-          )
-          .moveDown()
-          .text("─".repeat(80), 50, doc.y) // Separator line
-          .moveDown();
+          .rect(50, currentY - 5, 500, 120)
+          .fillColor(index % 2 === 0 ? "#F4F6F7" : "white")
+          .fillOpacity(0.5)
+          .fill();
+
+        // Reset for content
+        doc.fillOpacity(1).fillColor(colors.text);
+
+        doc
+          .fontSize(10)
+          .font("Helvetica-Bold")
+          .text(`Incident #${incident.id}`, 60, currentY, {
+            underline: true,
+          })
+          .font("Helvetica")
+          .moveDown(0.5);
+
+        // Incident details with aligned layout
+        const details = [
+          `Date: ${formatDate(incident.dateCaught, "yyyy-MM-dd")}`,
+          `Ranger: ${incident.ranger?.names || "Unknown"}`,
+          `Description: ${incident.description}`,
+          `Evidence: ${incident.evidence?.join(", ") || "None"}`,
+        ];
+
+        details.forEach((detail) => {
+          doc
+            .fillColor(colors.text)
+            .text(detail, 60, doc.y, {
+              width: 480,
+              align: "left",
+            })
+            .moveDown(0.5);
+        });
+
+        // Stylized separator
+        doc
+          .strokeColor(colors.separator)
+          .lineWidth(0.5)
+          .moveTo(50, doc.y)
+          .lineTo(550, doc.y)
+          .stroke()
+          .moveDown(1);
 
         currentY = doc.y + 10;
       });
+
+      // Footer
+      doc
+        .fontSize(8)
+        .fillColor(colors.text)
+        .text(`Page ${doc.bufferedPageRange().count}`, 50, 820, {
+          align: "center",
+        });
 
       doc.end();
 
@@ -354,7 +400,6 @@ export class IncidentService {
       stream.on("error", reject);
     });
   }
-
   async generateReport(dto: GenerateReportDto): Promise<string> {
     const { type, format } = dto;
     const { start, end } = this.getDateRange(type, dto.startDate, dto.endDate);

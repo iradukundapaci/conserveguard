@@ -112,16 +112,7 @@ export class UsersService {
     const queryBuilder = this.usersRepository
       .createQueryBuilder("users")
       .leftJoinAndSelect("users.group", "group")
-      .orderBy("users.id", "DESC")
-      .select([
-        "users.id",
-        "users.names",
-        "users.role",
-        "users.profileImage",
-        "users.email",
-        "group.id",
-        "group.name",
-      ]);
+      .orderBy("users.id", "DESC");
 
     if (dto.role) {
       queryBuilder.andWhere("users.role = :role", {
